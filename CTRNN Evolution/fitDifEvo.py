@@ -5,16 +5,16 @@ import gymnasium as gym
 import matplotlib.pyplot as plt
 
 # env = gym.make("MountainCarContinuous-v0")
-# env = gym.make("LunarLander-v2",continuous=True)
+env = gym.make("LunarLander-v2",continuous=True)
 # env = gym.make("BipedalWalker-v3")
-env = gym.make("BipedalWalker-v3",hardcore=True)
+# env = gym.make("BipedalWalker-v3",hardcore=True)
 
 
 zeroBias = False
 
 popSize = 50
 gens = 100
-netSize = 30
+netSize = 12
 fitCurve = np.zeros(gens)
 fitDifCurve = np.zeros(gens)
 numMutPoints = int(pow(netSize,0.6))
@@ -145,7 +145,6 @@ with open("best_net.pkl", "wb") as f:
 
     
 plt.plot(fitCurve)
-# plt.plot(fitDifCurve)
 plt.xlabel("generation")
 plt.ylabel("avg fitness of pop")
 # plt.title("Seed:" + str(seed))

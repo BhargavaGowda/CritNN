@@ -5,31 +5,33 @@ import matplotlib.pyplot as plt
 import pickle
 
 # env = gym.make("MountainCarContinuous-v0",render_mode="human")
-# env = gym.make("LunarLander-v2",continuous=True)
+env = gym.make("LunarLander-v2",continuous=True)
 # env = gym.make("BipedalWalker-v3")
-env = gym.make("BipedalWalker-v3",hardcore=True)
+# env = gym.make("BipedalWalker-v3",hardcore=True)
 inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
 
-# net = CTRNN(10)
-# net.mutateSplit(3,1)
-# net.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
-# net.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
-# with open("net.pkl", "wb") as f:
-#     pickle.dump(net, f)
+net = CTRNN(10)
+net.mutateSplit(3,1)
+net.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
+net.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
+with open("net.pkl", "wb") as f:
+    pickle.dump(net, f)
 
-with open("best_net.pkl", "rb") as f:
+with open("net.pkl", "rb") as f:
     net = pickle.load(f)
     net.reset()
-print(net.bias)
+
+print(net.size)
+
 imgSize = 50
 paramStep = 0.1
 
 i_off=-2.5+0.31
 j_off=0
 
-p1=13
-p2=16
+p1=-1
+p2=-2
 
 
 
