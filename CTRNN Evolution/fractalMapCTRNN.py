@@ -24,16 +24,16 @@ with open("best_fit.pkl", "rb") as f:
 
 print(net.size)
 
-imgSize = 20
-paramStep = 0.5
+imgSize = 50
+paramStep = 0.1
 
 i_off=0
 j_off=0
 
 b1=-1
 b2=-2
-w1=[-1,2]
-w2=[-1,3]
+w1=[-1,0]
+w2=[-2,0]
 
 imgfit = np.zeros((imgSize,imgSize))
 imgObs=np.zeros((imgSize,imgSize,inps))
@@ -78,7 +78,7 @@ for i in range(imgSize):
 
         net.weights[w2[0],w2[1]]+=paramStep
     net.weights[w1[0],w1[1]]+=paramStep
-    net.weights[w2[0],w2[1]]+=paramStep
+    net.weights[w2[0],w2[1]]-=paramStep*imgSize
 
     #     net.bias[b2]+=paramStep
     # net.bias[b1]+=paramStep
