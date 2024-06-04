@@ -5,13 +5,13 @@ import gymnasium as gym
 import matplotlib.pyplot as plt
 
 # env = gym.make("MountainCarContinuous-v0")
-# env = gym.make("LunarLander-v2",continuous=True)
-env = gym.make("BipedalWalker-v3")
+env = gym.make("LunarLander-v2",continuous=True)
+# env = gym.make("BipedalWalker-v3")
 
 
 popSize = 50
 gens = 200
-netSize = 30
+netSize = 10
 fitCurve = np.zeros(gens)
 bestFitCurve = np.zeros(gens)
 numMutPoints = int(pow(netSize,0.6))

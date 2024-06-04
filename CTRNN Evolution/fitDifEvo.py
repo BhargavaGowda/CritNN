@@ -75,6 +75,7 @@ for g in range(gens):
                 break
 
         firstFit = fitness
+        firstObs = observation[-3]
 
         # 2nd run
         observation, info = env.reset(seed=seed)
@@ -94,7 +95,8 @@ for g in range(gens):
             if fitness<-200:
                 break
 
-        pop[i][1] = abs(firstFit-fitness)/CTRNN.getDistance(net,net2)
+        # pop[i][1] = abs(firstFit-fitness)/CTRNN.getDistance(net,net2)
+        pop[i][1] = abs(firstObs-observation[-3])/CTRNN.getDistance(net,net2)
         pop[i][2] = firstFit
 
         if pop[i][2]>bestFitness:

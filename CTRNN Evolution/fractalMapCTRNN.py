@@ -11,60 +11,54 @@ env = gym.make("LunarLander-v2",continuous=True)
 inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
 
-net = CTRNN(10)
-net.mutateSplit(3,1)
-net.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
-net.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
-with open("net.pkl", "wb") as f:
-    pickle.dump(net, f)
+# net = CTRNN(10)
+# net.mutateSplit(3,1)
+# net.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
+# net.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
+# with open("net.pkl", "wb") as f:
+#     pickle.dump(net, f)
 
-with open("net.pkl", "rb") as f:
+with open("best_fit.pkl", "rb") as f:
     net = pickle.load(f)
     net.reset()
 
 print(net.size)
 
-imgSize = 50
-paramStep = 0.1
+imgSize = 20
+paramStep = 0.5
 
-i_off=-2.5+0.31
+i_off=0
 j_off=0
 
-p1=-1
-p2=-2
-
-
+b1=-1
+b2=-2
+w1=[-1,2]
+w2=[-1,3]
 
 imgfit = np.zeros((imgSize,imgSize))
-img0 = np.zeros((imgSize,imgSize))
-img1 = np.zeros((imgSize,imgSize))
-img2 = np.zeros((imgSize,imgSize))
+imgObs=np.zeros((imgSize,imgSize,inps))
+imgPots=np.zeros((imgSize,imgSize,net.size))
 
-# net.weights[net.size-2,2] +=i_off
-# net.weights[net.size-1,2] +=j_off
-# a=float(net.weights[net.size-2,2])
-# b=float(net.weights[net.size-1,2])
-net.bias[p1] += i_off
-net.bias[p2] += j_off
-a = float(net.bias[p1])
-b = float(net.bias[p2])
+net.weights[w1[0],w1[1]] +=i_off
+net.weights[w2[0],w2[1]] +=j_off
+a=float(net.weights[w1[0],w1[1]])
+b=float(net.weights[w2[0],w2[1]])
+# net.bias[b1] += i_off
+# net.bias[b2] += j_off
+# a = float(net.bias[b1])
+# b = float(net.bias[b2])
 
-
-
-print(net.size)
-print(a,b)
-
-# net.weights[net.size-2,2] += -0.5*paramStep*imgSize
-# net.weights[net.size-1,2] += -0.5*paramStep*imgSize
-net.bias[p1] += -0.5*paramStep*imgSize
-net.bias[p2] += -0.5*paramStep*imgSize
+net.weights[w1[0],w1[1]] += -0.5*paramStep*imgSize
+net.weights[w2[0],w2[1]] += -0.5*paramStep*imgSize
+# net.bias[b1] += -0.5*paramStep*imgSize
+# net.bias[b2] += -0.5*paramStep*imgSize
 
 
 for i in range(imgSize):
     print("progress:",str(100*i/float(imgSize))+"%")
     for j in range(imgSize):
         net.reset()
-        observation, info = env.reset(seed=3)
+        observation, info = env.reset(seed=5)
         fitness = 0
         while True:
 
@@ -78,37 +72,75 @@ for i in range(imgSize):
 
         # img[j,i] = observation[0]
         imgfit[j,i] = fitness
-        img0[j,i] = observation[0]
-        img1[j,i] = observation[1]
-        img2[j,i] = observation[2]
+        imgObs[j,i] = observation
+        imgPots[j,i] = net.potentials
         fitness = 0
 
-        net.bias[p2]+=paramStep
-    net.bias[p1]+=paramStep
-    net.bias[p2]-=paramStep*imgSize
+        net.weights[w2[0],w2[1]]+=paramStep
+    net.weights[w1[0],w1[1]]+=paramStep
+    net.weights[w2[0],w2[1]]+=paramStep
+
+    #     net.bias[b2]+=paramStep
+    # net.bias[b1]+=paramStep
+    # net.bias[b2]-=paramStep*imgSize
 
 
+print("Saving images...")
 
-fig, axs = plt.subplots(2,2)
-axs = axs.flatten()
-im = axs[0].imshow(imgfit,cmap="magma",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
-plt.colorbar(im,ax=axs[0])
-im = axs[1].imshow(img0,cmap="YlGn_r",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
-plt.colorbar(im,ax=axs[1])
-im = axs[2].imshow(img1,cmap="RdPu_r",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
-plt.colorbar(im,ax=axs[2])
-im = axs[3].imshow(img2,cmap="GnBu_r",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
-plt.colorbar(im,ax=axs[3])
-fig.supxlabel("bias:"+str(p1))
-fig.supylabel("bias:"+str(p2))
+# plt.xlabel("bias:"+str(b1))
+# plt.ylabel("bias:"+str(b2))
+plt.xlabel("weight:"+str(w1[0])+","+str(w1[1]))
+plt.ylabel("weight:"+str(w2[0])+","+str(w2[1]))
+plt.imshow(imgfit,cmap="RdBu",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
+plt.colorbar()
+plt.title("Fitness")
+plt.savefig('figs/fitness.png', bbox_inches='tight')
+plt.clf()
 
-#titles
-axs[0].title.set_text("Fitness")
-axs[1].title.set_text("x")
-axs[2].title.set_text("y")
-axs[3].title.set_text("x speed")
+for ob in range(inps):
+    plt.imshow(imgObs[:,:,ob],cmap="copper",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
+    plt.colorbar()
+    plt.title("Observation "+str(ob))
+    # plt.xlabel("bias:"+str(b1))
+    # plt.ylabel("bias:"+str(b2))
+    plt.xlabel("weight:"+str(w1[0])+","+str(w1[1]))
+    plt.ylabel("weight:"+str(w2[0])+","+str(w2[1]))
+    plt.savefig('figs/obs_'+str(ob)+'.png', bbox_inches='tight')
+    plt.clf()
 
-#labels
+for pot in range(net.size):
+    plt.imshow(imgPots[:,:,pot],cmap="bone",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
+    plt.colorbar()
+    # plt.xlabel("bias:"+str(b1))
+    # plt.ylabel("bias:"+str(b2))
+    plt.xlabel("weight:"+str(w1[0])+","+str(w1[1]))
+    plt.ylabel("weight:"+str(w2[0])+","+str(w2[1]))
+    plt.title("Potential "+str(pot))
+    plt.savefig('figs/pots_'+str(pot)+'.png', bbox_inches='tight')
+    plt.clf()
+
+print("Done.")
+
+# fig, axs = plt.subplots(2,2)
+# axs = axs.flatten()
+# im = axs[0].imshow(imgfit,cmap="magma",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
+# plt.colorbar(im,ax=axs[0])
+# im = axs[1].imshow(img0,cmap="YlGn_r",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
+# plt.colorbar(im,ax=axs[1])
+# im = axs[2].imshow(img1,cmap="RdPu_r",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
+# plt.colorbar(im,ax=axs[2])
+# im = axs[3].imshow(img2,cmap="GnBu_r",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
+# plt.colorbar(im,ax=axs[3])
+# fig.supxlabel("bias:"+str(b1))
+# fig.supylabel("bias:"+str(b2))
+
+# #titles
+# axs[0].title.set_text("Fitness")
+# axs[1].title.set_text("-1")
+# axs[2].title.set_text("-2")
+# axs[3].title.set_text("-3")
+
+# #labels
 
 
-plt.show()
+# plt.show()
