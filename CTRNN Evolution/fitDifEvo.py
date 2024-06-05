@@ -4,8 +4,8 @@ import numpy as np
 import gymnasium as gym
 import matplotlib.pyplot as plt
 
-# env = gym.make("MountainCarContinuous-v0")
-env = gym.make("LunarLander-v2",continuous=True)
+env = gym.make("InvertedDoublePendulum-v4")
+# env = gym.make("LunarLander-v2",continuous=True)
 # env = gym.make("BipedalWalker-v3")
 # env = gym.make("BipedalWalker-v3",hardcore=True)
 
@@ -13,7 +13,7 @@ env = gym.make("LunarLander-v2",continuous=True)
 zeroBias = False
 
 popSize = 50
-gens = 100
+gens = 500
 netSize = 12
 fitCurve = np.zeros(gens)
 fitDifCurve = np.zeros(gens)
@@ -54,7 +54,8 @@ for g in range(gens):
 
         net = pop[i][0]
         net2=CTRNN.recombine(net,net)
-        net2.mutatePointFull(1)
+        for i in range(numMutPoints):
+            net2.mutatePointFull(0.2)
 
         # first run
         observation, info = env.reset(seed=seed)
@@ -95,8 +96,8 @@ for g in range(gens):
             if fitness<-200:
                 break
 
-        # pop[i][1] = abs(firstFit-fitness)/CTRNN.getDistance(net,net2)
-        pop[i][1] = abs(firstObs-observation[-3])/CTRNN.getDistance(net,net2)
+        pop[i][1] = abs(firstFit-fitness)/CTRNN.getDistance(net,net2)
+        # pop[i][1] = abs(firstObs-observation[-3])/CTRNN.getDistance(net,net2)
         pop[i][2] = firstFit
 
         if pop[i][2]>bestFitness:
@@ -123,7 +124,7 @@ for g in range(gens):
 
         newNet = CTRNN.recombine(pop[a][0],pop[b][0])
 
-        mutRate = 1#1-(0.9*g)/gens
+        mutRate = 2#1-(0.9*g)/gens
 
         if i >popSize//2:
             for i in range(numMutPoints):

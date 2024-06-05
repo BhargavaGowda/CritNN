@@ -4,8 +4,8 @@ import gymnasium as gym
 import matplotlib.pyplot as plt
 import pickle
 
-# env = gym.make("MountainCarContinuous-v0",render_mode="human")
-env = gym.make("LunarLander-v2",continuous=True)
+env = gym.make("InvertedDoublePendulum-v4")
+# env = gym.make("LunarLander-v2",continuous=True)
 # env = gym.make("BipedalWalker-v3")
 # env = gym.make("BipedalWalker-v3",hardcore=True)
 inps = env.observation_space.shape[0]
@@ -18,22 +18,22 @@ outs = env.action_space.shape[0]
 # with open("net.pkl", "wb") as f:
 #     pickle.dump(net, f)
 
-with open("best_fit.pkl", "rb") as f:
+with open("best_net.pkl", "rb") as f:
     net = pickle.load(f)
     net.reset()
 
 print(net.size)
 
-imgSize = 50
-paramStep = 0.1
+imgSize = 200
+paramStep = 0.05
 
-i_off=0
-j_off=0
+i_off=0.02
+j_off=0.004
 
 b1=-1
 b2=-2
-w1=[-1,0]
-w2=[-2,0]
+w1=[11,6]
+w2=[11,7]
 
 imgfit = np.zeros((imgSize,imgSize))
 imgObs=np.zeros((imgSize,imgSize,inps))
@@ -47,6 +47,7 @@ b=float(net.weights[w2[0],w2[1]])
 # net.bias[b2] += j_off
 # a = float(net.bias[b1])
 # b = float(net.bias[b2])
+print(a,b)
 
 net.weights[w1[0],w1[1]] += -0.5*paramStep*imgSize
 net.weights[w2[0],w2[1]] += -0.5*paramStep*imgSize
@@ -58,7 +59,8 @@ for i in range(imgSize):
     print("progress:",str(100*i/float(imgSize))+"%")
     for j in range(imgSize):
         net.reset()
-        observation, info = env.reset(seed=5)
+        # SEED
+        observation, info = env.reset(seed=4)
         fitness = 0
         while True:
 
@@ -91,14 +93,14 @@ print("Saving images...")
 # plt.ylabel("bias:"+str(b2))
 plt.xlabel("weight:"+str(w1[0])+","+str(w1[1]))
 plt.ylabel("weight:"+str(w2[0])+","+str(w2[1]))
-plt.imshow(imgfit,cmap="RdBu",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
+plt.imshow(imgfit,cmap="RdYlGn",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
 plt.colorbar()
 plt.title("Fitness")
 plt.savefig('figs/fitness.png', bbox_inches='tight')
 plt.clf()
 
 for ob in range(inps):
-    plt.imshow(imgObs[:,:,ob],cmap="copper",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
+    plt.imshow(imgObs[:,:,ob],cmap="pink",extent=[a+paramStep*(0-imgSize//2),a+paramStep*(imgSize-1-imgSize//2),b+paramStep*(0-imgSize//2),b+paramStep*(imgSize-1-imgSize//2)],origin = "lower",interpolation='none')
     plt.colorbar()
     plt.title("Observation "+str(ob))
     # plt.xlabel("bias:"+str(b1))
