@@ -4,14 +4,14 @@ import numpy as np
 import gymnasium as gym
 import matplotlib.pyplot as plt
 
-env = gym.make("InvertedDoublePendulum-v4")
-# env = gym.make("LunarLander-v2",continuous=True)
+# env = gym.make("InvertedDoublePendulum-v4")
+env = gym.make("LunarLander-v2",continuous=True)
 # env = gym.make("BipedalWalker-v3")
 
 
-popSize = 100
-gens = 1000
-netSize = 12
+popSize = 50
+gens = 150
+netSize = 10
 fitCurve = np.zeros(gens)
 bestFitCurve = np.zeros(gens)
 numMutPoints = int(pow(netSize,0.6))

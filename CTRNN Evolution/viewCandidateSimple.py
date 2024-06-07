@@ -4,35 +4,33 @@ import gymnasium as gym
 from gymnasium.wrappers import NormalizeObservation
 import matplotlib.pyplot as plt
 import pickle
+from myDoublePendulum import myPendulum
 
-env = gym.make("InvertedDoublePendulum-v4",render_mode="human")
-# env = gym.make("LunarLander-v2",continuous=True,render_mode="human")
+# env = gym.make("HalfCheetah-v4",render_mode="human")
+env = gym.make("LunarLander-v2",continuous=True,render_mode="human")
 # env = gym.make("BipedalWalker-v3",render_mode="human")
 # env = gym.make("BipedalWalker-v3",hardcore=True,render_mode="human")
-
-
 inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
 
 
-# net = CTRNN(5)
-# net.mutateSimple(3)
-# with open("net.pkl", "wb") as f:
-#     pickle.dump(net, f)
+net = CTRNN(25)
+net.mutateSimple(3)
+with open("net.pkl", "wb") as f:
+    pickle.dump(net, f)
 
 with open("best_net.pkl", "rb") as f:
     net = pickle.load(f)
     net.reset()
 
 print(net.size)
-print(net.timescale)
 
 while True:
     seed = np.random.randint(0,100000)
-    seed = 4
+    # seed = 4
     print("seed:",seed)
-    
     observation, info = env.reset(seed=seed)
+    # print(env.set_state(np.array([0,0,0]),np.array([0,0,0])))
     fitness = 0
     net.reset()
 

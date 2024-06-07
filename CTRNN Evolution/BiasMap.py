@@ -3,9 +3,11 @@ import numpy as np
 import gymnasium as gym
 import matplotlib.pyplot as plt
 import pickle
+from matplotlib.colors import LogNorm
+from myDoublePendulum import myPendulum
 
-env = gym.make("InvertedDoublePendulum-v4")
-# env = gym.make("LunarLander-v2",continuous=True)
+# env = gym.make("HalfCheetah-v4")
+env = gym.make("LunarLander-v2",continuous=True)
 # env = gym.make("BipedalWalker-v3")
 # env = gym.make("BipedalWalker-v3",hardcore=True)
 inps = env.observation_space.shape[0]
@@ -24,16 +26,16 @@ with open("best_net.pkl", "rb") as f:
 
 print(net.size)
 
-imgSize = 200
-paramStep = 0.05
+imgSize = 50
+paramStep = 0.2
 
-i_off=0.02
-j_off=0.004
+i_off=0
+j_off=0
 
 b1=-1
 b2=-2
-w1=[11,6]
-w2=[11,7]
+w1=[8,1]
+w2=[9,1]
 
 imgfit = np.zeros((imgSize,imgSize))
 imgObs=np.zeros((imgSize,imgSize,inps))
