@@ -7,17 +7,18 @@ import pickle
 
 # env = gym.make("MountainCarContinuous-v0")
 # env = gym.make("LunarLander-v2",continuous=True)
-env = gym.make("BipedalWalker-v3")
+# env = gym.make("BipedalWalker-v3")
+env = gym.make("InvertedDoublePendulum-v4")
 
 
 inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
 
 
-# net = CTRNN(10)
-# net.mutateSimple(3)
-# with open("net.pkl", "wb") as f:
-#     pickle.dump(net, f)
+net = CTRNN(10)
+net.mutateSimple(2)
+with open("net.pkl", "wb") as f:
+    pickle.dump(net, f)
 
 with open("best_fit.pkl", "rb") as f:
     net = pickle.load(f)
@@ -25,7 +26,7 @@ with open("best_fit.pkl", "rb") as f:
 
 print(net.size)
 
-numTrials = 50
+numTrials = 200
 data = np.zeros(numTrials)
 
 for t in range(numTrials):

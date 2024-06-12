@@ -138,37 +138,39 @@ class CTRNN:
 
         return newBrain
 
-    def mutate(self,mutationSize=0.01):
-        self.weights = (self.weights+(numpy.random.rand(self.size,self.size)-0.5)*mutationSize).clip(-1*self.weightRange,self.weightRange)
-        self.bias = (self.bias+(numpy.random.rand(self.size)-0.5)*mutationSize).clip(-1*self.biasRange,self.biasRange)
-        self.timescale = (self.timescale+(numpy.random.rand(self.size)-0.5)*mutationSize).clip(0,1)
+    # def mutate(self,mutationSize=0.01):
+    #     self.weights = (self.weights+(numpy.random.rand(self.size,self.size)-0.5)*mutationSize).clip(-1*self.weightRange,self.weightRange)
+    #     self.bias = (self.bias+(numpy.random.rand(self.size)-0.5)*mutationSize).clip(-1*self.biasRange,self.biasRange)
+    #     self.timescale = (self.timescale+(numpy.random.rand(self.size)-0.5)*mutationSize).clip(0,1)
 
-    # keeps time constants constant
-    def mutateSimple(self, mutationSize = 0.01):
-        self.weights = (self.weights+numpy.random.randn(self.size,self.size)*mutationSize).clip(-1*self.weightRange,self.weightRange)
-        self.bias = (self.bias+numpy.random.randn(self.size)*mutationSize).clip(-1*self.biasRange,self.biasRange)
+    # # keeps time constants constant
+    def mutateSimple(self, mutationSize = 1):
+        self.weights = (self.weights+numpy.random.normal(loc=0,scale=mutationSize,size=self.weights.shape)).clip(-1*self.weightRange,self.weightRange)
+        self.bias = (self.bias+numpy.random.normal(loc=0,scale=mutationSize,size=self.bias.shape)).clip(-1*self.biasRange,self.biasRange)
 
 
-    def mutateSplit(self, mutationSize = 0.1, timeChangeSize = 0.01):
-        self.weights = (self.weights+(numpy.random.rand(self.size,self.size)-0.5)*mutationSize).clip(-1*self.weightRange,self.weightRange)
-        self.bias = (self.bias+(numpy.random.rand(self.size)-0.5)*mutationSize).clip(-1*self.biasRange,self.biasRange)
-        self.timescale = (self.timescale+(numpy.random.rand(self.size)-0.5)*timeChangeSize).clip(0,1)
+    # def mutateSplit(self, mutationSize = 0.1, timeChangeSize = 0.01):
+    #     self.weights = (self.weights+(numpy.random.rand(self.size,self.size)-0.5)*mutationSize).clip(-1*self.weightRange,self.weightRange)
+    #     self.bias = (self.bias+(numpy.random.rand(self.size)-0.5)*mutationSize).clip(-1*self.biasRange,self.biasRange)
+    #     self.timescale = (self.timescale+(numpy.random.rand(self.size)-0.5)*timeChangeSize).clip(0,1)
 
-    def mutatePoint(self,mutationSize=1):
-        w1 = numpy.random.randint(self.size)
-        w2 = numpy.random.randint(self.size)
-        b = numpy.random.randint(self.size)
-        self.weights[w1,w2]+=numpy.random.randn()*mutationSize
-        self.bias[b]+=numpy.random.randn()*mutationSize
+    # def mutatePoint(self,mutationSize=1):
+    #     w1 = numpy.random.randint(self.size)
+    #     w2 = numpy.random.randint(self.size)
+    #     b = numpy.random.randint(self.size)
+    #     self.weights[w1,w2]+=numpy.random.randn()*mutationSize
+    #     self.bias[b]+=numpy.random.randn()*mutationSize
 
     def mutatePointFull(self,mutationSize=1):
         w1 = numpy.random.randint(self.size)
         w2 = numpy.random.randint(self.size)
         b = numpy.random.randint(self.size)
         t = numpy.random.randint(self.size)
-        self.weights[w1,w2]+=numpy.random.randn()*mutationSize
-        self.bias[b]+=numpy.random.randn()*mutationSize
-        self.timescale[t] = (self.timescale[t]+numpy.random.randn()*0.1).clip(0,1)
+        self.weights[w1,w2]+=numpy.random.normal(loc=0,scale=mutationSize)
+        self.bias[b]+=numpy.random.normal(loc=0,scale=mutationSize)
+        # self.timescale[t] = (self.timescale[t]+numpy.random.randn()*0.1).clip(0,1)
+        self.timescale[t] = numpy.clip((numpy.random.exponential(scale=1)),0,1)
+
 
 
         

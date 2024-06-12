@@ -24,8 +24,9 @@ with open("best_net.pkl", "rb") as f:
 
 print(net.size)
 
-imgSize = 200
-paramStep = 0.05
+imgSize = 50
+paramStep = 0.005
+numTrials = 3
 
 i_off=0.02
 j_off=0.004
@@ -58,25 +59,24 @@ net.weights[w2[0],w2[1]] += -0.5*paramStep*imgSize
 for i in range(imgSize):
     print("progress:",str(100*i/float(imgSize))+"%")
     for j in range(imgSize):
-        net.reset()
-        # SEED
-        observation, info = env.reset(seed=4)
-        fitness = 0
-        while True:
+        for trial in range(numTrials):
+            net.reset()
+            observation, info = env.reset()
+            fitness = 0
+            while True:
 
-            inp = np.array(observation)
-            action = net.step(np.concatenate((inp,np.zeros(net.size-inp.size))))
-            observation, reward, terminated, truncated, info = env.step(action[-outs:])
-            fitness+= reward
+                inp = np.array(observation)
+                action = net.step(np.concatenate((inp,np.zeros(net.size-inp.size))))
+                observation, reward, terminated, truncated, info = env.step(action[-outs:])
+                fitness+= reward
 
-            if terminated or truncated:
-                break
+                if terminated or truncated:
+                    break
 
-        # img[j,i] = observation[0]
-        imgfit[j,i] = fitness
-        imgObs[j,i] = observation
-        imgPots[j,i] = net.potentials
-        fitness = 0
+            # img[j,i] = observation[0]
+            imgfit[j,i] += fitness
+            imgObs[j,i] += observation
+            imgPots[j,i] += net.potentials
 
         net.weights[w2[0],w2[1]]+=paramStep
     net.weights[w1[0],w1[1]]+=paramStep
@@ -86,6 +86,9 @@ for i in range(imgSize):
     # net.bias[b1]+=paramStep
     # net.bias[b2]-=paramStep*imgSize
 
+imgfit/=numTrials
+imgObs/=numTrials
+imgPots/=numTrials
 
 print("Saving images...")
 
