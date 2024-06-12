@@ -4,38 +4,39 @@ import numpy as np
 import gymnasium as gym
 import matplotlib.pyplot as plt
 
-# env = gym.make("InvertedDoublePendulum-v4")
+env = gym.make("InvertedDoublePendulum-v4")
 # env = gym.make("LunarLander-v2",continuous=True)
-env = gym.make("BipedalWalker-v3")
-# env = gym.make("BipedalWalker-v3",hardcore=True)
+# env = gym.make("BipedalWalker-v3")
 
 
-zeroBias = False
-
-popSize = 50
-gens = 200
-netSize = 30
+popSize = 200
+gens = 600
+netSize = 12
 fitCurve = np.zeros(gens)
-fitDifCurve = np.zeros(gens)
+bestFitCurve = np.zeros(gens)
 numMutPoints = int(pow(netSize,0.6))
 print("numMutPoints:",numMutPoints)
 pop = []
 
+importNet = False
+
 inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
 
-
-
+bestFitness = -10000
 
 for i in range(popSize):
 
-    net = CTRNN(netSize)
-    net.mutateSimple(1)
-    if zeroBias:
-        net.bias = np.zeros(net.size)
+    if importNet:
+        with open("best_fit.pkl", "rb") as f:
+            net = pickle.load(f)
+            net.reset()
+    else:
+        net = CTRNN(netSize)
+        net.mutateSimple(1)
     net.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
     net.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
-    pop.append([net,0,0])
+    pop.append([net,0])
 
 
 
@@ -53,17 +54,14 @@ for g in range(gens):
         seed = np.random.randint(0,100000)
 
         net = pop[i][0]
-        net2=CTRNN.recombine(net,net)
-        for i in range(numMutPoints):
-            net2.mutatePointFull(1)
 
         # first run
         observation, info = env.reset(seed=seed)
         net.reset()
         fitness = 0
         
-        # while True:
-        for _ in range(500):
+        while True:
+        # for _ in range(300):
 
             inp = np.array(observation)
             action = net.step(np.concatenate((inp,np.zeros(net.size-inp.size))))
@@ -72,49 +70,20 @@ for g in range(gens):
 
             if terminated or truncated:
                 break
-            if fitness<-200:
-                break
-
-        firstFit = fitness
-        firstObs = observation[-3]
-
-        # 2nd run
-        observation, info = env.reset(seed=seed)
-        net2.reset()
-        fitness = 0
         
-        # while True:
-        for _ in range(500):
-
-            inp = np.array(observation)
-            action = net2.step(np.concatenate((inp,np.zeros(net2.size-inp.size))))
-            observation, reward, terminated, truncated, info = env.step(action[-outs:])
-            fitness+= reward
-
-            if terminated or truncated:
-                break
-            if fitness<-200:
-                break
-
-        pop[i][1] = abs(firstFit-fitness)/CTRNN.getDistance(net,net2)
-        pop[i][2] = firstFit
-
-        if pop[i][2]>bestFitness:
+        if fitness>bestFitness:
             with open("best_fit.pkl", "wb") as f:
                 pickle.dump(net, f)
-            bestFitness=pop[i][2]
-        
+            bestFitness=fitness
+        pop[i][1] = fitness
 
     pop.sort(key= lambda x : -x[1])
-    fitCurve[g] = bestFitness#sum(pop[i][2] for i in range(popSize//2))/float(popSize//2)
-    print(fitCurve[g])
-    
-    
-    
-    
-    
+    bestFitCurve[g] = bestFitness
+    fitCurve[g] = sum(pop[i][1] for i in range(popSize//2))/float(popSize//2)
+    print(fitCurve[g],bestFitCurve[g])
+
     newPop = []
-    newPop.append([pop[0][0],0,0])
+    newPop.append([pop[0][0],0])
 
     for i in range(popSize-1):
 
@@ -125,20 +94,17 @@ for g in range(gens):
 
         newNet = CTRNN.recombine(pop[a][0],pop[b][0])
 
-        mutRate = 2#1-(0.9*g)/gens
+        mutRate = 1#1-(0.9*g)/gens
 
         if i >popSize//2:
             for i in range(numMutPoints):
                 newNet.mutatePointFull(mutRate)    
 
-                   
-        if zeroBias:
-            newNet.bias = np.zeros(net.size)
 
         newNet.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
         newNet.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
 
-        newPop.append([newNet,0,0])
+        newPop.append([newNet,0])
 
     pop = newPop
     # for i in range(10):
@@ -149,11 +115,13 @@ with open("best_net.pkl", "wb") as f:
 
     
 plt.plot(fitCurve)
+plt.plot(bestFitCurve)
 plt.xlabel("generation")
-plt.ylabel("avg fitness of pop")
+plt.ylabel("fitness")
+plt.legend(["population mean","fittest net"])
 # plt.title("Seed:" + str(seed))
-plt.title("random seed")
-plt.savefig('fitcurveDifEvo.png', bbox_inches='tight')
+# plt.title("random seed")
+plt.savefig('fitcurveSimpleEvo.png', bbox_inches='tight')
 plt.show()
 
 

@@ -61,8 +61,8 @@ for g in range(gens):
         net.reset()
         fitness = 0
         
-        # while True:
-        for _ in range(400):
+        while True:
+        # for _ in range(400):
 
             inp = np.array(observation)
             action = net.step(np.concatenate((inp,np.zeros(net.size-inp.size))))
@@ -86,8 +86,8 @@ for g in range(gens):
             net2.reset()
             fitness = 0
             
-            # while True:
-            for _ in range(400):
+            while True:
+            # for _ in range(400):
 
                 inp = np.array(observation)
                 action = net2.step(np.concatenate((inp,np.zeros(net2.size-inp.size))))
