@@ -3,9 +3,11 @@ import numpy as np
 import gymnasium as gym
 import matplotlib.pyplot as plt
 import pickle
+from matplotlib.colors import LogNorm
+from myDoublePendulum import myPendulum
 
-env = gym.make("InvertedDoublePendulum-v4")
-# env = gym.make("LunarLander-v2",continuous=True)
+# env = gym.make("HalfCheetah-v4")
+env = gym.make("LunarLander-v2",continuous=True)
 # env = gym.make("BipedalWalker-v3")
 # env = gym.make("BipedalWalker-v3",hardcore=True)
 inps = env.observation_space.shape[0]
@@ -25,16 +27,15 @@ with open("best_net.pkl", "rb") as f:
 print(net.size)
 
 imgSize = 50
-paramStep = 0.005
-numTrials = 3
+paramStep = 0.2
 
-i_off=0.02
-j_off=0.004
+i_off=0
+j_off=0
 
 b1=-1
 b2=-2
-w1=[11,6]
-w2=[11,7]
+w1=[8,1]
+w2=[9,1]
 
 imgfit = np.zeros((imgSize,imgSize))
 imgObs=np.zeros((imgSize,imgSize,inps))
@@ -59,24 +60,25 @@ net.weights[w2[0],w2[1]] += -0.5*paramStep*imgSize
 for i in range(imgSize):
     print("progress:",str(100*i/float(imgSize))+"%")
     for j in range(imgSize):
-        for trial in range(numTrials):
-            net.reset()
-            observation, info = env.reset()
-            fitness = 0
-            while True:
+        net.reset()
+        # SEED
+        observation, info = env.reset(seed=4)
+        fitness = 0
+        while True:
 
-                inp = np.array(observation)
-                action = net.step(np.concatenate((inp,np.zeros(net.size-inp.size))))
-                observation, reward, terminated, truncated, info = env.step(action[-outs:])
-                fitness+= reward
+            inp = np.array(observation)
+            action = net.step(np.concatenate((inp,np.zeros(net.size-inp.size))))
+            observation, reward, terminated, truncated, info = env.step(action[-outs:])
+            fitness+= reward
 
-                if terminated or truncated:
-                    break
+            if terminated or truncated:
+                break
 
-            # img[j,i] = observation[0]
-            imgfit[j,i] += fitness
-            imgObs[j,i] += observation
-            imgPots[j,i] += net.potentials
+        # img[j,i] = observation[0]
+        imgfit[j,i] = fitness
+        imgObs[j,i] = observation
+        imgPots[j,i] = net.potentials
+        fitness = 0
 
         net.weights[w2[0],w2[1]]+=paramStep
     net.weights[w1[0],w1[1]]+=paramStep
@@ -86,9 +88,6 @@ for i in range(imgSize):
     # net.bias[b1]+=paramStep
     # net.bias[b2]-=paramStep*imgSize
 
-imgfit/=numTrials
-imgObs/=numTrials
-imgPots/=numTrials
 
 print("Saving images...")
 
