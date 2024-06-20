@@ -1,16 +1,15 @@
 import pickle
 import numpy as np
-from PyCTRNNv3 import CTRNN
+import matplotlib.pyplot as plt
 
-with open("modelArchive\Lunar Lander\\150 gens\\best_net.pkl", "rb") as f:
-    net1 = pickle.load(f)
-    net1.reset()
+data1 = np.loadtxt("data/Cheetah1.txt")
+data2 = np.loadtxt("data/Cheetah2.txt")
+data3 = np.loadtxt("data/Cheetah3.txt")
 
-with open("modelArchive\Lunar Lander\\20 gens\\best_net.pkl", "rb") as f:
-    net2 = pickle.load(f)
-    net2.reset()
+# plt.boxplot([data1,data2,data3])
+plt.ylabel("Fitness")
 
-# print(abs(net1.weights[8,:]-net2.weights[8,:]))
-print(net1.weights[8,2],net1.weights[8,3])
-print(net2.weights[8,2],net2.weights[8,3])
-print(net1.timescale-net2.timescale)
+plt.bar(["bad","ok","good"],[np.std(data1),np.std(data2),np.std(data3)])
+plt.title("Fitness distribution across 100 runs")
+plt.show()
+

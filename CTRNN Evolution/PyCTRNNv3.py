@@ -13,6 +13,7 @@ class CTRNN:
         self.timescale = (numpy.full(size,0.1))
         self.weightRange = weightRange
         self.biasRange = biasRange
+        self.reset()
 
         
 
@@ -147,6 +148,7 @@ class CTRNN:
     def mutateSimple(self, mutationSize = 1):
         self.weights = (self.weights+numpy.random.normal(loc=0,scale=mutationSize,size=self.weights.shape)).clip(-1*self.weightRange,self.weightRange)
         self.bias = (self.bias+numpy.random.normal(loc=0,scale=mutationSize,size=self.bias.shape)).clip(-1*self.biasRange,self.biasRange)
+        self.timescale = (self.timescale+numpy.random.normal(loc=0,scale=mutationSize,size=self.timescale.shape)).clip(0,1)
 
 
     # def mutateSplit(self, mutationSize = 0.1, timeChangeSize = 0.01):

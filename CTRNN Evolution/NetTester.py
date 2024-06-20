@@ -7,34 +7,27 @@ import pickle
 
 # env = gym.make("MountainCarContinuous-v0")
 # env = gym.make("LunarLander-v2",continuous=True)
-# env = gym.make("BipedalWalker-v3")
-env = gym.make("InvertedDoublePendulum-v4")
+env = gym.make("HalfCheetah-v4")
+# env = gym.make("InvertedDoublePendulum-v4")
 
 
 inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
 
 
-net = CTRNN(10)
-net.mutateSimple(2)
-with open("net.pkl", "wb") as f:
-    pickle.dump(net, f)
 
-with open("best_fit.pkl", "rb") as f:
-    net = pickle.load(f)
-    net.reset()
-
-print(net.size)
-
-numTrials = 200
+numTrials = 100
 data = np.zeros(numTrials)
 
 for t in range(numTrials):
     print("progress:",str(100*t/float(numTrials))+"%")
    
-    observation, info = env.reset()
+    observation, info = env.reset(seed=4)
     fitness = 0
-    net.reset()
+    with open("best_fit.pkl", "rb") as f:
+        net = pickle.load(f)
+        net.mutatePointFull(0.1)
+        net.reset()
 
     while True:
 
@@ -50,8 +43,7 @@ for t in range(numTrials):
             break
     data[t] = fitness
 
-plt.boxplot(data)
-plt.show()
+np.savetxt("data/Cheetah2.txt",data)
 
 
     
