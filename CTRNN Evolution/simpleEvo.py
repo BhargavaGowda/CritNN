@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 def main():
 
     #Search Parameters
-    popSize = 100
-    gens = 50
-    netSize = 25
+    popSize = 50
+    gens = 200
+    netSize = 10
     numSteps = 500
 
     numMutPoints = int(pow(netSize,0.6))
@@ -28,7 +28,7 @@ def main():
 
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
-        envs = gym.vector.make("HalfCheetah-v4",num_envs = popSize)
+        envs = gym.vector.make("InvertedPendulum-v4",num_envs = popSize)
         # envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
         # env = gym.make("BipedalWalker-v3")
 

@@ -1,6 +1,6 @@
 from PyCTRNNv3 import CTRNN
 import pickle
-import math
+import copy
 import numpy as np
 import gymnasium as gym
 import matplotlib.pyplot as plt
@@ -11,7 +11,7 @@ def main():
 
     #Search Parameters
     popSize = 50
-    gens = 500
+    gens = 200
     netSize = 20
     numSteps = 500
 
@@ -20,8 +20,10 @@ def main():
     crossover = False
     importNet = False
 
-    numRuns = 30
+    numRuns = 1
     data = np.zeros((numRuns,gens))
+    archiveSize = 500
+    archive = np.zeros((archiveSize,archiveSize))
 
     for run in range(numRuns):
         print("Run:",run)
@@ -31,7 +33,7 @@ def main():
         bestFitCurve = np.zeros(gens)
         envs = gym.vector.make("HalfCheetah-v4",num_envs = popSize)
         # envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
-        # envs = gym.vector.make("BipedalWalker-v3",num_envs = popSize)
+        # env = gym.make("BipedalWalker-v3")
 
         # Initializing Population
         inps = envs.observation_space.shape[1]
@@ -49,7 +51,7 @@ def main():
                 net.mutateSimple(1)
             net.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
             net.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
-            pop.append([net,0,0])
+            pop.append([net,0])
 
 
         #Running gens
@@ -73,7 +75,6 @@ def main():
 
                 observations, rewards, terminateds, truncateds, infos = envs.step(actions)
                 fits += dones*rewards
-                fits = fits.clip(min=-100)
 
                 for d in range(popSize):
                     if terminateds[d] or truncateds[d]:
@@ -82,7 +83,15 @@ def main():
             for p in range(popSize):
                 pop[p][1] = fits[p]
 
-            pop.sort(key= lambda x : -x[1])
+                x = pop[p][0].weights[-1,0]
+                y = pop[p][0].weights[-1,1]
+
+                x = int(np.clip(x*50+250,0,499))
+                y = int(np.clip(y*50+250,0,499))
+
+                if (pop[p][1]>archive[x,y]):
+                    archive[x,y] = pop[p][1]
+
             
             #Checking best fit
             if pop[0][1]>bestFitness:
@@ -115,27 +124,17 @@ def main():
                     bestFitness=np.mean(fits)
            
             bestFitCurve[g] = bestFitness
+            print("best fit:",bestFitness)
 
+            #RANDOM
             for p in range(popSize):
-                crit = 0
-                for b in range(popSize):
-                    if p!=b:
-                        if math.isclose(CTRNN.getDistance(pop[p][0],pop[b][0]), 0, abs_tol=0.00003):
-                            crit+=0
-                        else:
-                            crit+=abs(pop[p][1]-pop[b][1]/CTRNN.getDistance(pop[p][0],pop[b][0]))
-
-                
-                crit/=float(popSize-1)
-                pop[p][2] = crit
-            
-            pop.sort(key= lambda x : -x[2])
-            print("fit:",bestFitness,"crit:",pop[0][2])
+                pop[p][1] = np.random.normal()
+            pop.sort(key= lambda x : -x[1])
 
 
             # Building Pop for next gen
             newPop = []
-            newPop.append([pop[0][0],0,0])
+            newPop.append([pop[0][0],0])
 
             for i in range(popSize-1):
 
@@ -150,16 +149,13 @@ def main():
 
                 newNet = CTRNN.recombine(pop[a][0],pop[b][0])
 
-
-
-                mutRate =2
-                for m in range(numMutPoints):
-                    newNet.mutatePointFull(mutRate)
+                mutRate =0.01
+                newNet.mutateSimple(mutRate)
 
                 newNet.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
                 newNet.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
 
-                newPop.append([newNet,0,0])
+                newPop.append([newNet,0])
 
             pop = newPop
 
@@ -170,7 +166,12 @@ def main():
         print(bestFitCurve[-1])
         envs.close()
 
-    np.savetxt("data/CritEvoResults.txt",data)
+    np.savetxt("data/SimpleEvoResults.txt",data)
+    cmap = copy.copy(plt.get_cmap('inferno'))
+    cmap.set_under('white',1.)
+    plt.imshow(archive,cmap=cmap,vmin=1,origin = "lower",interpolation='none')
+    plt.savefig('figs/MAGEliteMap_Random.png', bbox_inches='tight')
+    plt.show()
 
 
 if __name__ == "__main__":
