@@ -5,7 +5,7 @@ from gymnasium.wrappers import NormalizeObservation
 import matplotlib.pyplot as plt
 import pickle
 
-env = gym.make("Hopper-v4",render_mode="human")
+env = gym.make("HalfCheetah-v4",render_mode="human")
 # env = gym.make("LunarLander-v2",continuous=True,render_mode="human")
 # env = gym.make("BipedalWalker-v3",render_mode="human")
 # env = gym.make("BipedalWalker-v3",hardcore=True,render_mode="human")
@@ -14,7 +14,7 @@ outs = env.action_space.shape[0]
 
 
 
-with open("ArchiveEvo/CVTarchive.pkl", "rb") as f:
+with open("ArchiveEvo/CVT-GHAST.pkl", "rb") as f:
     archive = pickle.load(f)
 
 # coords = (-326,-266)
@@ -30,12 +30,15 @@ with open("ArchiveEvo/CVTarchive.pkl", "rb") as f:
 #     net = archive[0][0]
 
 print(len(archive))
-archive.sort(key=lambda x :-x[2])
+print(archive[4][0].timescale)
+print(CTRNN.getDistance(archive[0][0],archive[2][0]))
+print(np.linalg.norm(archive[0][1]-archive[2][1]))
+archive.sort(key=lambda x :-x[3])
 neti=0
 while True: 
-    observation, info = env.reset()
+    observation, info = env.reset(seed=4)
     fitness = 0
-    net = archive[neti][1]
+    net = archive[neti][2]
     neti+=1
     net.reset()
 

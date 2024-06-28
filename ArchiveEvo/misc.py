@@ -7,21 +7,23 @@ from PyCTRNNv3 import CTRNN
 # total = 0
 # for i in range(300):
 #     newNet = CTRNN.copy(baseNet)
-#     newNet.mutateSimple(1)
+#     newNet.mutateSimple(0.01)
 #     total+=CTRNN.getDistance(newNet,baseNet)
 
 # print(total/300)
 
+test = np.random.normal(0,.1,1000)
 
-# data1 = np.loadtxt("data/Cheetah1.txt")
-# data2 = np.loadtxt("data/Cheetah2.txt")
-data3 = np.loadtxt("data\CVTMAGEvoResults.txt")
 
-# plt.boxplot([data1,data2,data3])
-plt.ylabel("Fitness")
+# # data1 = np.loadtxt("data/Cheetah1.txt")
+# # data2 = np.loadtxt("data/Cheetah2.txt")
+# data3 = np.loadtxt("data\CVTMAGEvoResults.txt")
 
-# plt.bar(["bad","ok","good"],[np.std(data1),np.std(data2),np.std(data3)])
-plt.plot(data3)
-plt.title("Fitness distribution across 100 runs")
+# # plt.boxplot([data1,data2,data3])
+# plt.ylabel("Fitness")
+
+# # plt.bar(["bad","ok","good"],[np.std(data1),np.std(data2),np.std(data3)])
+plt.hist(test,100)
+# plt.title("Fitness distribution across 100 runs")
 plt.show()
 
