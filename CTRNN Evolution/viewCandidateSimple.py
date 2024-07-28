@@ -6,18 +6,14 @@ import matplotlib.pyplot as plt
 import pickle
 from myDoublePendulum import myPendulum
 
-env = gym.make("InvertedPendulum-v4",render_mode="human")
+# env = gym.make("MountainCarContinuous-v0",render_mode="human")
+env = gym.make("Ant-v4",render_mode="human")
 # env = gym.make("LunarLander-v2",continuous=True,render_mode="human")
 # env = gym.make("BipedalWalker-v3",render_mode="human")
 # env = gym.make("BipedalWalker-v3",hardcore=True,render_mode="human")
 inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
 
-
-net = CTRNN(20)
-net.mutateSimple(3)
-with open("net.pkl", "wb") as f:
-    pickle.dump(net, f)
 
 with open("best_fit.pkl", "rb") as f:
     net = pickle.load(f)
@@ -31,9 +27,10 @@ while True:
     net.reset()
 
 
-    for _ in range(500):
+    for _ in range(1000):
 
-        inp = np.array(observation)
+        alpha=1
+        inp = alpha * np.array(observation) + (1-alpha)*np.random.normal(size=observation.shape)
         action = net.step(np.concatenate((inp,np.zeros(net.size-inps))))
         # action = np.zeros(outs)
         observation, reward, terminated, truncated, info = env.step(action[-outs:])
