@@ -10,8 +10,8 @@ def main():
 
     #Search Parameters
     popSize = 50
-    gens = 200
-    netSize = 10
+    gens = 300
+    netSize = 30
     numSteps = 500
 
     numMutPoints = int(pow(netSize,0.6))
@@ -19,7 +19,7 @@ def main():
     crossover = False
     importNet = False
 
-    numRuns = 1
+    numRuns = 5
     data = np.zeros((numRuns,gens))
 
     for run in range(numRuns):
@@ -28,9 +28,9 @@ def main():
 
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
-        envs = gym.vector.make("InvertedPendulum-v4",num_envs = popSize)
+        # envs = gym.vector.make("InvertedPendulum-v4",num_envs = popSize)
         # envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
-        # env = gym.make("BipedalWalker-v3")
+        envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         # Initializing Population
         inps = envs.observation_space.shape[1]

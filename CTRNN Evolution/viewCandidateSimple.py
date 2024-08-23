@@ -7,9 +7,9 @@ import pickle
 from myDoublePendulum import myPendulum
 
 # env = gym.make("MountainCarContinuous-v0",render_mode="human")
-env = gym.make("Ant-v4",render_mode="human")
+# env = gym.make("Hopper-v4",render_mode="human")
 # env = gym.make("LunarLander-v2",continuous=True,render_mode="human")
-# env = gym.make("BipedalWalker-v3",render_mode="human")
+env = gym.make("BipedalWalker-v3",render_mode="human")
 # env = gym.make("BipedalWalker-v3",hardcore=True,render_mode="human")
 inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
@@ -27,7 +27,7 @@ while True:
     net.reset()
 
 
-    for _ in range(1000):
+    for _ in range(500):
 
         alpha=1
         inp = alpha * np.array(observation) + (1-alpha)*np.random.normal(size=observation.shape)

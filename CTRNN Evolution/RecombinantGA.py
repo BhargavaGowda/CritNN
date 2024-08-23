@@ -10,7 +10,7 @@ def main():
 
     #Search Parameters
     popSize = 50
-    gens = 200
+    gens = 300
     netSize = 20
     numSteps = 500
     crossPoints = int(pow(netSize,0.6))
@@ -20,7 +20,7 @@ def main():
 
     diversityThreshold = 5 #0.1*(netSize**2)
 
-    numRuns = 1
+    numRuns = 5
     data = np.zeros((numRuns,gens))
 
     for run in range(numRuns):
@@ -29,7 +29,7 @@ def main():
 
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
-        envs = gym.vector.make("Hopper-v4",num_envs = popSize)
+        envs = gym.vector.make("InvertedDoublePendulum-v4",num_envs = popSize)
         # envs = gym.make_vec("LunarLander-v2",continuous=True,num_envs=popSize)
         # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
@@ -138,6 +138,7 @@ def main():
 
                 if avgDiv<diversityThreshold:
                         newNet.mutateModular()
+                        newNet.mutateModular()
 
                 newNet.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
                 newNet.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
@@ -152,7 +153,7 @@ def main():
         print(bestFitCurve[-1])
         envs.close()
 
-    np.savetxt("data/SimpleEvoResults.txt",data)
+    np.savetxt("data/RecombinantEvoResults.txt",data)
 
 
 if __name__ == "__main__":
