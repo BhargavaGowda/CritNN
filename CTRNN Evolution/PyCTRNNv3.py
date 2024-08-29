@@ -102,6 +102,23 @@ class CTRNN:
         return newBrain
     
     @staticmethod
+    def recombineModular(brain1,brain2):
+        splitPoint = numpy.random.randint(brain1.size)
+
+        newBrain = CTRNN(brain1.size)
+        for i in range(newBrain.size):
+            if i <splitPoint:
+                newBrain.weights[i,:]=brain1.weights[i,:]
+                newBrain.bias[i]=brain1.bias[i]
+                newBrain.timescale[i]=brain1.timescale[i]
+            else:
+                newBrain.weights[i,:]=brain2.weights[i,:]
+                newBrain.bias[i]=brain2.bias[i]
+                newBrain.timescale[i]=brain2.timescale[i]
+
+        return newBrain
+
+    @staticmethod
     def copy(brain1):
         return CTRNN.recombine(brain1,brain1)
     

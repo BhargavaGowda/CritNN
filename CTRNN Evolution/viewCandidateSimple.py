@@ -15,7 +15,7 @@ inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
 
 
-with open("best_fit.pkl", "rb") as f:
+with open("best_net.pkl", "rb") as f:
     net = pickle.load(f)
     net.reset()
 
@@ -27,7 +27,7 @@ while True:
     net.reset()
 
 
-    for _ in range(1000):
+    for _ in range(500):
 
         alpha=1
         inp = alpha * np.array(observation) + (1-alpha)*np.random.normal(size=observation.shape)
