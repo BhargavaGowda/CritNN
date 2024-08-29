@@ -10,8 +10,8 @@ def main():
 
     #Search Parameters
     popSize = 50
-    gens = 300
-    netSize = 30
+    gens = 10000
+    netSize = 40
     numSteps = 500
 
     numMutPoints = int(pow(netSize,0.6))
@@ -19,7 +19,7 @@ def main():
     crossover = False
     importNet = False
 
-    numRuns = 5
+    numRuns = 1
     data = np.zeros((numRuns,gens))
 
     for run in range(numRuns):
@@ -28,9 +28,9 @@ def main():
 
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
-        # envs = gym.vector.make("InvertedPendulum-v4",num_envs = popSize)
+        envs = gym.vector.make("Ant-v4",num_envs = popSize)
         # envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
-        envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
+        # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         # Initializing Population
         inps = envs.observation_space.shape[1]
@@ -134,8 +134,8 @@ def main():
                 newNet = CTRNN.recombine(pop[a][0],pop[b][0])
 
                 mutRate =1
-                for m in range(numMutPoints):
-                    newNet.mutatePointFull(mutRate)
+                # for m in range(numMutPoints):
+                newNet.mutateModular(mutRate)
 
                 newNet.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
                 newNet.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
@@ -151,7 +151,7 @@ def main():
         print(bestFitCurve[-1])
         envs.close()
 
-    np.savetxt("data/SimpleEvoResults.txt",data)
+    np.savetxt("data/SimpleEvo_ModMutate_Results.txt",data)
 
 
 if __name__ == "__main__":

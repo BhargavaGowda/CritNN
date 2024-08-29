@@ -10,8 +10,8 @@ def main():
 
     #Search Parameters
     popSize = 50
-    gens = 300
-    netSize = 20
+    gens = 1000
+    netSize = 30
     numSteps = 500
     crossPoints = int(pow(netSize,0.6))
     mutPoints =  int(netSize**0.4)
@@ -20,7 +20,7 @@ def main():
 
     diversityThreshold = 5 #0.1*(netSize**2)
 
-    numRuns = 5
+    numRuns = 10
     data = np.zeros((numRuns,gens))
 
     for run in range(numRuns):
@@ -29,9 +29,9 @@ def main():
 
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
-        envs = gym.vector.make("InvertedDoublePendulum-v4",num_envs = popSize)
+        # envs = gym.vector.make("Ant-v4",num_envs = popSize)
         # envs = gym.make_vec("LunarLander-v2",continuous=True,num_envs=popSize)
-        # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
+        envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         # Initializing Population
         inps = envs.observation_space.shape[1]
@@ -132,7 +132,7 @@ def main():
                 while a == b:
                     b= np.random.randint(0,popSize//2)
 
-                newNet = CTRNN.recombine(pop[a][0],pop[b][0])
+                newNet = CTRNN.recombineModular(pop[a][0],pop[b][0])
                 for c in range(crossPoints):
                     newNet = CTRNN.recombine(newNet,pop[a][0]) if np.random.rand()>0.5 else CTRNN.recombine(newNet,pop[b][0])
 

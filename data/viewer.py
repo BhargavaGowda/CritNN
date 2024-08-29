@@ -29,6 +29,7 @@ for i in range(data2.shape[1]):
 plt.plot(range(data2.shape[1]),mean)
 plt.fill_between(range(data2.shape[1]),mean+variance,mean-variance, color='orange',alpha=0.2)
 
+# plt.plot(data1)
 plt.ylabel("Fitness")
 plt.xlabel("Batches")
 plt.show()

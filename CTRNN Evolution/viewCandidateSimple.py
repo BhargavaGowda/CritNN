@@ -7,15 +7,15 @@ import pickle
 from myDoublePendulum import myPendulum
 
 # env = gym.make("MountainCarContinuous-v0",render_mode="human")
-# env = gym.make("Hopper-v4",render_mode="human")
+env = gym.make("Ant-v4",render_mode="human")
 # env = gym.make("LunarLander-v2",continuous=True,render_mode="human")
-env = gym.make("BipedalWalker-v3",render_mode="human")
+# env = gym.make("BipedalWalker-v3",render_mode="human")
 # env = gym.make("BipedalWalker-v3",hardcore=True,render_mode="human")
 inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
 
 
-with open("best_fit.pkl", "rb") as f:
+with open("best_net.pkl", "rb") as f:
     net = pickle.load(f)
     net.reset()
 
