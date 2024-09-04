@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 data1 = np.loadtxt("data\SimpleEvoResults.txt")
-data2 = np.loadtxt("data\RecombinantEvoResults.txt")
+
 
 mean = np.zeros(data1.shape[1])
 variance = np.zeros(data1.shape[1])
@@ -17,6 +17,8 @@ for i in range(data1.shape[1]):
 plt.plot(range(data1.shape[1]),mean)
 plt.fill_between(range(data1.shape[1]),mean+variance,mean-variance, color='blue',alpha=0.2)
 
+
+data2 = np.loadtxt("data\Recombinant_ModularEvoResults.txt")
 mean = np.zeros(data2.shape[1])
 variance = np.zeros(data2.shape[1])
 
@@ -26,11 +28,13 @@ for i in range(data2.shape[1]):
     variance[i] = np.std(data2[:,i])
 
 
-plt.plot(range(data2.shape[1]),mean)
+plt.plot(range(data2.shape[1]),mean,color="orange")
 plt.fill_between(range(data2.shape[1]),mean+variance,mean-variance, color='orange',alpha=0.2)
 
-# plt.plot(data1)
+
+
+
 plt.ylabel("Fitness")
-plt.xlabel("Batches")
+plt.xlabel("Gens")
 plt.show()
 

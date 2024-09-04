@@ -11,7 +11,7 @@ def main():
     #Search Parameters
     popSize = 50
     gens = 1000
-    netSize = 30
+    netSize = 40
     numSteps = 500
     crossPoints = int(pow(netSize,0.6))
     mutPoints =  int(netSize**0.4)
@@ -29,9 +29,9 @@ def main():
 
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
-        # envs = gym.vector.make("Ant-v4",num_envs = popSize)
+        envs = gym.vector.make("Ant-v4",num_envs = popSize)
         # envs = gym.make_vec("LunarLander-v2",continuous=True,num_envs=popSize)
-        envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
+        # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         # Initializing Population
         inps = envs.observation_space.shape[1]

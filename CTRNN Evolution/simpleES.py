@@ -10,15 +10,11 @@ def main():
 
     #Search Parameters
     popSize = 50
-    gens = 1000
-    netSize = 40
+    gens = 500
+    netSize = 10
     numSteps = 500
-
-    numMutPoints = int(pow(netSize,0.6))
-    print("numMutPoints:",numMutPoints)
-    crossover = False
     importNet = False
-
+    stepSize = 0.05
     numRuns = 10
     data = np.zeros((numRuns,gens))
 
@@ -28,8 +24,8 @@ def main():
 
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
-        envs = gym.vector.make("Ant-v4",num_envs = popSize)
-        # envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
+        # envs = gym.vector.make("Ant-v4",num_envs = popSize)
+        envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
         # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         # Initializing Population
@@ -37,15 +33,16 @@ def main():
         outs = envs.action_space.shape[1]
 
         pop = []
+        mainNet = CTRNN(netSize)
+        mainNet.setInputs(np.concatenate([np.ones(inps),np.zeros(netSize-inps)]))
+        mainNet.setOutputs(np.concatenate([np.zeros(netSize-outs),np.ones(outs)]))
+        if importNet:
+            with open("best_fit.pkl", "rb") as f:
+                net = pickle.load(f)
+                net.reset()
         for i in range(popSize):
-
-            if importNet:
-                with open("best_fit.pkl", "rb") as f:
-                    net = pickle.load(f)
-                    net.reset()
-            else:
-                net = CTRNN(netSize)
-                net.mutateSimple(1)
+            net = CTRNN.copy(mainNet)
+            net.mutateSimple()
             net.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
             net.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
             pop.append([net,0])
@@ -116,42 +113,30 @@ def main():
             print("best fit:",bestFitness)
 
 
-            # Building Pop for next gen
-            newPop = []
-            newPop.append([pop[0][0],0])
+            # Updating center
+            fits = fits/np.linalg.norm(fits)
+            for i in range(popSize):
+                mainNet.weights+=stepSize*(pop[i][0].weights-mainNet.weights)*fits[i]
+                mainNet.bias+=stepSize*(pop[i][0].bias-mainNet.bias)*fits[i]
+                mainNet.timescale+=stepSize*(pop[i][0].timescale-mainNet.timescale)*fits[i]
 
-            for i in range(popSize-1):
+            for i in range(popSize):
+                net = CTRNN.copy(mainNet)
+                net.mutateSimple()
+                net.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
+                net.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
+                pop[i] = [net,0]
 
-                a = np.random.randint(0,popSize//2)
-                b = np.random.randint(0,popSize//2)
-
-                if crossover:
-                    while a == b:
-                        b= np.random.randint(0,popSize//2)
-                else:
-                    b = a
-
-                newNet = CTRNN.recombine(pop[a][0],pop[b][0])
-
-                mutRate =1
-                # for m in range(numMutPoints):
-                newNet.mutateModular(mutRate)
-
-                newNet.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
-                newNet.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
-
-                newPop.append([newNet,0])
-
-            pop = newPop
+            
 
         #End Run  
-        with open("best_net.pkl", "wb") as f:
-            pickle.dump(pop[0][0], f)
+        with open("main_net.pkl", "wb") as f:
+            pickle.dump(mainNet, f)
         data[run,:] = bestFitCurve
         print(bestFitCurve[-1])
         envs.close()
 
-    np.savetxt("data/SimpleEvoResults.txt",data)
+    np.savetxt("data/ES_Results2.txt",data)
 
 
 if __name__ == "__main__":
