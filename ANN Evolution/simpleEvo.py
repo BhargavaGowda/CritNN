@@ -1,4 +1,4 @@
-from PyCTRNNv3 import CTRNN
+from PyANN import ANN
 import pickle
 import numpy as np
 import gymnasium as gym
@@ -11,14 +11,13 @@ def main():
     #Search Parameters
     popSize = 50
     gens = 1000
-    netSize = 40
+    netSize = [8,2]
     numSteps = 500
-    crossPoints = int(pow(netSize,0.6))
-    mutPoints =  int(netSize**0.4)
 
-    print("network of size:",netSize,"with ",crossPoints,"-point crossover and ",mutPoints,"-point mutation.")
-
-    diversityThreshold = 5 #0.1*(netSize**2)
+    numMutPoints = int(pow(netSize,0.6))
+    print("numMutPoints:",numMutPoints)
+    crossover = False
+    importNet = False
 
     numRuns = 10
     data = np.zeros((numRuns,gens))
@@ -29,8 +28,8 @@ def main():
 
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
-        envs = gym.vector.make("Ant-v4",num_envs = popSize)
-        # envs = gym.make_vec("LunarLander-v2",continuous=True,num_envs=popSize)
+        # envs = gym.vector.make("Ant-v4",num_envs = popSize)
+        envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
         # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         # Initializing Population
@@ -39,11 +38,12 @@ def main():
 
         pop = []
         for i in range(popSize):
-
-            net = CTRNN(netSize)
-            net.mutateSimple(1)
-            net.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
-            net.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
+            if importNet:
+                with open("best_fit.pkl", "rb") as f:
+                    net = pickle.load(f)
+            else:
+                net = ANN(netSize)
+                net.mutateSimple(1)
             pop.append([net,0])
 
 
@@ -56,14 +56,12 @@ def main():
             observations, infos = envs.reset()
             fits = np.zeros(popSize)
             dones = np.ones(popSize)
-            for i in range(popSize):
-                pop[i][0].reset()
-
+            
             for _ in range(numSteps):
 
                 actions = []
                 for i in range(popSize):
-                    action = pop[i][0].step(np.concatenate((observations[i],np.zeros(net.size-inps))))[-outs:]
+                    action = pop[i][0].step(observations[i])
                     actions.append(action)
 
                 observations, rewards, terminateds, truncateds, infos = envs.step(actions)
@@ -77,18 +75,13 @@ def main():
                 pop[p][1] = fits[p]
 
             pop.sort(key= lambda x : -x[1])
-
-            # if pop[0][1]>bestFitness: 
-            #     with open("best_fit.pkl", "wb") as f:
-            #         pickle.dump(pop[0][0], f)
-            #     bestFitness=pop[0][1]
-
-            # Checking best fit
+            
+            #Checking best fit
             if pop[0][1]>bestFitness:
 
                 testPop = []
                 for i in range(popSize):
-                    testPop.append(CTRNN.recombine(pop[0][0],pop[0][0]))
+                    testPop.append(ANN.copy(pop[0][0]))
 
                 observations, infos = envs.reset()
                 fits = np.zeros(popSize)
@@ -98,7 +91,7 @@ def main():
 
                     actions = []
                     for i in range(popSize):
-                        action = testPop[i].step(np.concatenate((observations[i],np.zeros(net.size-inps))))[-outs:]
+                        action = testPop[i].step(observations[i])
                         actions.append(action)
 
                     observations, rewards, terminateds, truncateds, infos = envs.step(actions)
@@ -115,8 +108,6 @@ def main():
            
             bestFitCurve[g] = bestFitness
             print("best fit:",bestFitness)
-            avgDiv = np.mean([CTRNN.getGeneDistance(pop[i][0],pop[i+1][0]) for i in range(popSize//2-1)])
-            print("Diversity:",avgDiv)
 
 
             # Building Pop for next gen
@@ -128,21 +119,16 @@ def main():
                 a = np.random.randint(0,popSize//2)
                 b = np.random.randint(0,popSize//2)
 
-                
-                while a == b:
-                    b= np.random.randint(0,popSize//2)
+                if crossover:
+                    while a == b:
+                        b= np.random.randint(0,popSize//2)
+                    newNet = ANN.recombine(pop[a][0],pop[b][0])
+                else:
+                    newNet = ANN.copy(pop[a][0])
 
-                newNet = CTRNN.recombineModular(pop[a][0],pop[b][0])
-                for c in range(crossPoints):
-                    newNet = CTRNN.recombineModular(newNet,pop[a][0]) if np.random.rand()>0.5 else CTRNN.recombineModular(newNet,pop[b][0])
-
-                if avgDiv<diversityThreshold:
-                        newNet.mutateModular()
-                        newNet.mutateModular()
-
-                newNet.setInputs(np.concatenate([np.ones(inps),np.zeros(net.size-inps)]))
-                newNet.setOutputs(np.concatenate([np.zeros(net.size-outs),np.ones(outs)]))
-                newPop.append([newNet,None])
+                mutRate =1
+                newNet.mutateSimple(mutRate)
+                newPop.append([newNet,0])
 
             pop = newPop
 
@@ -153,7 +139,7 @@ def main():
         print(bestFitCurve[-1])
         envs.close()
 
-    np.savetxt("data/RecombinantEvoResults.txt",data)
+    np.savetxt("data/ANN_SimpleEvoResults.txt",data)
 
 
 if __name__ == "__main__":
