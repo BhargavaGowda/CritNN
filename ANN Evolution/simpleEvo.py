@@ -10,12 +10,12 @@ def main():
 
     #Search Parameters
     popSize = 50
-    gens = 1000
-    netSize = [8,2]
+    gens = 500
+    netSize = [8,24,2]
     numSteps = 500
 
-    numMutPoints = int(pow(netSize,0.6))
-    print("numMutPoints:",numMutPoints)
+    # numMutPoints = int(pow(netSize,0.6))
+    # print("numMutPoints:",numMutPoints)
     crossover = False
     importNet = False
 
