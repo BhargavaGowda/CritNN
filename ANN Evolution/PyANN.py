@@ -31,6 +31,12 @@ class ANN:
             self.weights[i]+=np.random.normal(loc=0,scale=mutationSize,size=self.weights[i].shape)
             self.bias[i]+=np.random.normal(loc=0,scale=mutationSize,size=self.bias[i].shape)
 
+    def mutateModular(self,mutationSize=1):
+        layer = np.random.randint(1,len(self.size))
+        neuron = np.random.randint(self.size[layer])
+        self.weights[layer-1][neuron,:]+=np.random.normal(loc=0,scale=mutationSize,size=self.weights[layer-1][neuron,:].shape)
+        self.bias[layer-1][neuron]+=np.random.normal(loc=0,scale=mutationSize)
+
     @staticmethod
     def copy(net):
         newNet = ANN(net.size)
