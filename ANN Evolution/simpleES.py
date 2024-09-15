@@ -10,13 +10,13 @@ def main():
 
     #Search Parameters
     popSize = 50
-    gens = 300
-    netSize = [8,64,2]
+    gens = 500
+    netSize = [8,10,2]
     numSteps = 500
     importNet = False
     stepSize = 0.1
-    mutSize = 0.01
-    numRuns = 1
+    mutSize = 1
+    numRuns = 10
     data = np.zeros((numRuns,gens))
 
     for run in range(numRuns):
@@ -25,7 +25,7 @@ def main():
 
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
-        # envs = gym.vector.make("Ant-v4",num_envs = popSize)
+        # envs = gym.vector.make("HalfCheetah-v4",num_envs = popSize)
         envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
         # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
@@ -41,7 +41,7 @@ def main():
                 net.reset()
         for i in range(popSize):
             net = ANN.copy(mainNet)
-            net.mutateSimple()
+            net.mutateSimple(mutSize)
             pop.append([net,0])
 
 
@@ -82,7 +82,7 @@ def main():
                     testPop.append(ANN.copy(pop[0][0]))
 
                 observations, infos = envs.reset()
-                fits = np.zeros(popSize)
+                tfits = np.zeros(popSize)
                 dones = np.ones(popSize)
 
                 for _ in range(numSteps):
@@ -93,16 +93,16 @@ def main():
                         actions.append(action)
 
                     observations, rewards, terminateds, truncateds, infos = envs.step(actions)
-                    fits += dones*rewards
+                    tfits += dones*rewards
 
                     for d in range(popSize):
                         if terminateds[d] or truncateds[d]:
                             dones[d]=0
 
-                if np.mean(fits)>bestFitness: 
+                if np.mean(tfits)>bestFitness: 
                     with open("best_fit.pkl", "wb") as f:
                         pickle.dump(testPop[0], f)
-                    bestFitness=np.mean(fits)
+                    bestFitness=np.mean(tfits)
            
             bestFitCurve[g] = bestFitness
             print("best fit:",bestFitness)
@@ -123,7 +123,7 @@ def main():
 
             for i in range(popSize):
                 net = ANN.copy(mainNet)
-                net.mutateSimple()
+                net.mutateSimple(mutSize)
                 pop[i] = [net,0]
 
 
@@ -134,7 +134,7 @@ def main():
         print(bestFitCurve[-1])
         envs.close()
 
-    np.savetxt("data/ES_Results.txt",data)
+    np.savetxt("data\ANN_ES_Lunar_m0.001_s0.1.txt",data)
 
 
 if __name__ == "__main__":

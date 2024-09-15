@@ -87,7 +87,7 @@ def main():
                     testPop.append(CTRNN.recombine(pop[0][0],pop[0][0]))
 
                 observations, infos = envs.reset()
-                fits = np.zeros(popSize)
+                tfits = np.zeros(popSize)
                 dones = np.ones(popSize)
 
                 for _ in range(numSteps):
@@ -98,16 +98,16 @@ def main():
                         actions.append(action)
 
                     observations, rewards, terminateds, truncateds, infos = envs.step(actions)
-                    fits += dones*rewards
+                    tfits += dones*rewards
 
                     for d in range(popSize):
                         if terminateds[d] or truncateds[d]:
                             dones[d]=0
 
-                if np.mean(fits)>bestFitness: 
+                if np.mean(tfits)>bestFitness: 
                     with open("best_fit.pkl", "wb") as f:
                         pickle.dump(testPop[0], f)
-                    bestFitness=np.mean(fits)
+                    bestFitness=np.mean(tfits)
            
             bestFitCurve[g] = bestFitness
             print("best fit:",bestFitness)

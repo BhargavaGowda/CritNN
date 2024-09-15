@@ -11,11 +11,11 @@ def main():
     #Search Parameters
     popSize = 50
     gens = 500
-    netSize = [8,24,2]
+    netSize = [8,20,2]
     numSteps = 500
 
-    # numMutPoints = int(pow(netSize,0.6))
-    # print("numMutPoints:",numMutPoints)
+    numMutPoints = int(pow(sum(netSize),0.6))
+    print("numMutPoints:",numMutPoints)
     crossover = False
     importNet = False
 
@@ -28,7 +28,7 @@ def main():
 
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
-        # envs = gym.vector.make("Ant-v4",num_envs = popSize)
+        # envs = gym.vector.make("Hopper-v4",num_envs = popSize)
         envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
         # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
@@ -77,35 +77,43 @@ def main():
             pop.sort(key= lambda x : -x[1])
             
             #Checking best fit
+            # if pop[0][1]>bestFitness:
+
+            #     testPop = []
+            #     for i in range(popSize):
+            #         testPop.append(ANN.copy(pop[0][0]))
+
+            #     observations, infos = envs.reset()
+            #     fits = np.zeros(popSize)
+            #     dones = np.ones(popSize)
+
+            #     for _ in range(numSteps):
+
+            #         actions = []
+            #         for i in range(popSize):
+            #             action = testPop[i].step(observations[i])
+            #             actions.append(action)
+
+            #         observations, rewards, terminateds, truncateds, infos = envs.step(actions)
+            #         fits += dones*rewards
+
+            #         for d in range(popSize):
+            #             if terminateds[d] or truncateds[d]:
+            #                 dones[d]=0
+
+            #     if np.mean(fits)>bestFitness: 
+            #         with open("best_fit.pkl", "wb") as f:
+            #             pickle.dump(testPop[0], f)
+            #         bestFitness=np.mean(fits)
+
+            #____
+            #Easy Best Fit
+            #-----
             if pop[0][1]>bestFitness:
+                with open("best_fit.pkl", "wb") as f:
+                    pickle.dump(pop[0][0], f)
+                bestFitness=pop[0][1]
 
-                testPop = []
-                for i in range(popSize):
-                    testPop.append(ANN.copy(pop[0][0]))
-
-                observations, infos = envs.reset()
-                fits = np.zeros(popSize)
-                dones = np.ones(popSize)
-
-                for _ in range(numSteps):
-
-                    actions = []
-                    for i in range(popSize):
-                        action = testPop[i].step(observations[i])
-                        actions.append(action)
-
-                    observations, rewards, terminateds, truncateds, infos = envs.step(actions)
-                    fits += dones*rewards
-
-                    for d in range(popSize):
-                        if terminateds[d] or truncateds[d]:
-                            dones[d]=0
-
-                if np.mean(fits)>bestFitness: 
-                    with open("best_fit.pkl", "wb") as f:
-                        pickle.dump(testPop[0], f)
-                    bestFitness=np.mean(fits)
-           
             bestFitCurve[g] = bestFitness
             print("best fit:",bestFitness)
 
@@ -127,7 +135,11 @@ def main():
                     newNet = ANN.copy(pop[a][0])
 
                 mutRate =1
-                newNet.mutateSimple(mutRate)
+                # newNet.mutateSimple()
+                for m in range(numMutPoints):
+                    newNet.mutateModular(mutRate)
+
+
                 newPop.append([newNet,0])
 
             pop = newPop
@@ -139,7 +151,7 @@ def main():
         print(bestFitCurve[-1])
         envs.close()
 
-    np.savetxt("data/ANN_SimpleEvoResults.txt",data)
+    np.savetxt("data/ANN_SimpleEvo_Lunar.txt",data)
 
 
 if __name__ == "__main__":

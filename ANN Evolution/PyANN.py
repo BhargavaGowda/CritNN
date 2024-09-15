@@ -13,6 +13,23 @@ class ANN:
         
         for i in range(len(size)-1):
             self.bias.append(np.zeros(size[i+1]))
+
+  
+    def getParamVec(self):
+        paramVec = np.zeros(0)
+        for w in range(len(self.size)-1):
+            paramVec = np.concatenate([paramVec, self.weights[w].flatten(),self.bias[w]])
+        return paramVec
+
+
+    def setParamVec(self,vec):
+        counter = 0
+        for w in range(len(self.size)-1):
+            length = self.size[w]*self.size[w+1]
+            self.weights[w] = vec[counter:counter+length].reshape(self.size[w+1],self.size[w])
+            self.bias[w] = vec[counter+length:counter+length+self.size[w+1]]
+            counter+=length+self.size[w+1] 
+
         
 
     @staticmethod

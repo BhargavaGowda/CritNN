@@ -10,15 +10,15 @@ def main():
 
     #Search Parameters
     popSize = 50
-    gens = 100
-    netSize = (8,2)
+    gens = 500
+    netSize = [24,10,4]
     numSteps = 500
     crossPoints = int(pow(sum(netSize),0.6))
     mutPoints =  int(sum(netSize)**0.4)
 
     print("network of size:",netSize,"with ",crossPoints,"-point crossover and ",mutPoints,"-point mutation.")
 
-    diversityThreshold = 1
+    diversityThreshold = 5
 
     numRuns = 10
     data = np.zeros((numRuns,gens))
@@ -30,8 +30,8 @@ def main():
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
         # envs = gym.vector.make("Ant-v4",num_envs = popSize)
-        envs = gym.make_vec("LunarLander-v2",continuous=True,num_envs=popSize)
-        # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
+        # envs = gym.make_vec("LunarLander-v2",continuous=True,num_envs=popSize)
+        envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         # Initializing Population
         inps = envs.observation_space.shape[1]
@@ -131,8 +131,10 @@ def main():
                 for c in range(crossPoints):
                     newNet = ANN.recombineModular(newNet,pop[a][0]) if np.random.rand()>0.5 else ANN.recombineModular(newNet,pop[b][0])
 
-                if avgDiv<diversityThreshold and i>popSize//2:
-                        newNet.mutateSimple()
+                if avgDiv<diversityThreshold: #and i>popSize//2:
+                        # newNet.mutateSimple()
+                        newNet.mutateModular()
+                        newNet.mutateModular()
 
                 newPop.append([newNet,None])
 
@@ -145,7 +147,7 @@ def main():
         print(bestFitCurve[-1])
         envs.close()
 
-    np.savetxt("data/RecombinantEvoResults.txt",data)
+    np.savetxt("data/ANN_RecombFullModular_BW.txt",data)
 
 
 if __name__ == "__main__":
