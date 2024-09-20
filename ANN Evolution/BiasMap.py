@@ -11,14 +11,13 @@ from matplotlib.colors import LogNorm
 env = gym.make("BipedalWalker-v3")
 # env = gym.make("BipedalWalker-v3",hardcore=True)
 
-net = ANN([24,40,4])
-net.mutateSimple()
-with open("net.pkl", "wb") as f:
-    pickle.dump(net, f)
+# net = ANN([24,40,4])
+# net.mutateSimple()
+# with open("net.pkl", "wb") as f:
+#     pickle.dump(net, f)
 
-# with open("best_net.pkl", "rb") as f:
-#     net = pickle.load(f)
-#     net.reset()
+with open("best_fit.pkl", "rb") as f:
+    net = pickle.load(f)
 
 print(net.size)
 
@@ -58,7 +57,7 @@ for i in range(imgSize):
         # SEED
         observation, info = env.reset(seed=4)
         fitness = 0
-        while True:
+        for _ in range(500):
 
             inp = np.array(observation)
             action = net.step(inp)
