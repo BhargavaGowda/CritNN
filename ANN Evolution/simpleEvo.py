@@ -11,7 +11,7 @@ def main():
     #Search Parameters
     popSize = 50
     gens = 500
-    netSize = [8,20,2]
+    netSize = [24,40,4]
     numSteps = 500
 
     numMutPoints = int(pow(sum(netSize),0.6))
@@ -19,7 +19,7 @@ def main():
     crossover = False
     importNet = False
 
-    numRuns = 10
+    numRuns = 1
     data = np.zeros((numRuns,gens))
 
     for run in range(numRuns):
@@ -29,8 +29,8 @@ def main():
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
         # envs = gym.vector.make("Hopper-v4",num_envs = popSize)
-        envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
-        # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
+        # envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
+        envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         # Initializing Population
         inps = envs.observation_space.shape[1]
@@ -151,7 +151,7 @@ def main():
         print(bestFitCurve[-1])
         envs.close()
 
-    np.savetxt("data/ANN_SimpleEvo_Lunar.txt",data)
+    np.savetxt("data/__.txt",data)
 
 
 if __name__ == "__main__":
