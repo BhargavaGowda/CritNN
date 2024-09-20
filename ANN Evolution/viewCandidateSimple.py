@@ -13,7 +13,7 @@ inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
 
 
-with open("best_fit.pkl", "rb") as f:
+
 with open("best_fit.pkl", "rb") as f:
     net = pickle.load(f)
 
