@@ -11,10 +11,11 @@ def main():
     #Search Parameters
     popSize = 50
     gens = 500
-    netSize = [24,10,4]
+    netSize = [24,40,4]
     numSteps = 500
     crossPoints = int(pow(sum(netSize),0.6))
-    mutPoints =  int(sum(netSize)**0.4)
+    mutPoints = int(pow(sum(netSize),0.6))
+    mutRate = 1
 
     print("network of size:",netSize,"with ",crossPoints,"-point crossover and ",mutPoints,"-point mutation.")
 
@@ -73,40 +74,40 @@ def main():
 
             pop.sort(key= lambda x : -x[1])
 
-            # if pop[0][1]>bestFitness: 
-            #     with open("best_fit.pkl", "wb") as f:
-            #         pickle.dump(pop[0][0], f)
-            #     bestFitness=pop[0][1]
+            if pop[0][1]>bestFitness: 
+                with open("best_fit.pkl", "wb") as f:
+                    pickle.dump(pop[0][0], f)
+                bestFitness=pop[0][1]
 
-            #Checking best fit
-            if pop[0][1]>bestFitness:
+            # #Checking best fit
+            # if pop[0][1]>bestFitness:
 
-                testPop = []
-                for i in range(popSize):
-                    testPop.append(ANN.copy(pop[0][0]))
+            #     testPop = []
+            #     for i in range(popSize):
+            #         testPop.append(ANN.copy(pop[0][0]))
 
-                observations, infos = envs.reset()
-                fits = np.zeros(popSize)
-                dones = np.ones(popSize)
+            #     observations, infos = envs.reset()
+            #     fits = np.zeros(popSize)
+            #     dones = np.ones(popSize)
 
-                for _ in range(numSteps):
+            #     for _ in range(numSteps):
 
-                    actions = []
-                    for i in range(popSize):
-                        action = testPop[i].step(observations[i])
-                        actions.append(action)
+            #         actions = []
+            #         for i in range(popSize):
+            #             action = testPop[i].step(observations[i])
+            #             actions.append(action)
 
-                    observations, rewards, terminateds, truncateds, infos = envs.step(actions)
-                    fits += dones*rewards
+            #         observations, rewards, terminateds, truncateds, infos = envs.step(actions)
+            #         fits += dones*rewards
 
-                    for d in range(popSize):
-                        if terminateds[d] or truncateds[d]:
-                            dones[d]=0
+            #         for d in range(popSize):
+            #             if terminateds[d] or truncateds[d]:
+            #                 dones[d]=0
 
-                if np.mean(fits)>bestFitness: 
-                    with open("best_fit.pkl", "wb") as f:
-                        pickle.dump(testPop[0], f)
-                    bestFitness=np.mean(fits)
+            #     if np.mean(fits)>bestFitness: 
+            #         with open("best_fit.pkl", "wb") as f:
+            #             pickle.dump(testPop[0], f)
+            #         bestFitness=np.mean(fits)
            
             bestFitCurve[g] = bestFitness
             print("best fit:",bestFitness)
@@ -133,8 +134,8 @@ def main():
 
                 if avgDiv<diversityThreshold: #and i>popSize//2:
                         # newNet.mutateSimple()
-                        newNet.mutateModular()
-                        newNet.mutateModular()
+                        for m in range(mutPoints):
+                            newNet.mutateModular(mutRate)
 
                 newPop.append([newNet,None])
 
