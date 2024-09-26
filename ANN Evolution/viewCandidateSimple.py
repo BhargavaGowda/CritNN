@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import pickle
 
 # env = gym.make("MountainCarContinuous-v0",render_mode="human")
-# env = gym.make("HalfCheetah-v4",render_mode="human")
+env = gym.make("Ant-v4",render_mode="human")
 # env = gym.make("LunarLander-v2",continuous=True,render_mode="human")
-env = gym.make("BipedalWalker-v3",render_mode="human")
+# env = gym.make("BipedalWalker-v3",render_mode="human")
 # env = gym.make("BipedalWalker-v3",hardcore=True,render_mode="human")
 inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]

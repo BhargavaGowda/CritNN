@@ -10,9 +10,9 @@ def main():
     
 
 
-    netSize = [24,40,4]
-    numRuns = 10
-    gens = 500
+    netSize = [27,64,64,8]
+    numRuns = 1
+    gens = 10000
     data = np.zeros((numRuns,gens))
     testNet = ANN(netSize)
     paramlength = testNet.getParamVec().size
@@ -36,9 +36,9 @@ def main():
 
         bestFitCurve = np.zeros(gens)
 
-        # envs = gym.vector.make("HalfCheetah-v4",num_envs = popSize)
+        envs = gym.vector.make("Ant-v4",num_envs = popSize)
         # envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
-        envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
+        # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         popVecs = es.ask()
         pop = []        

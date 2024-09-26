@@ -66,7 +66,7 @@ class ANN:
     def getGeneDistance(net1,net2):
         output = 0
         for i in range(len(net1.size)-1):
-            output += np.linalg.norm(net1.weights[i]-net2.weights[i])+np.linalg.norm(net1.bias[i]-net2.bias[i])
+            output += np.count_nonzero(net1.weights[i]-net2.weights[i])+np.count_nonzero(net1.bias[i]-net2.bias[i])
         return output
     
     @staticmethod
