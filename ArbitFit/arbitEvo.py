@@ -10,14 +10,12 @@ def main():
 
     #Search Parameters
     popSize = 50
-    gens = 50
-    netSize = [18,16,16,6]
+    gens = 500
+    netSize = [11,32,32,3]
     numSteps = 500
 
     numMutPoints = int(pow(sum(netSize),0.6))
     print("numMutPoints:",numMutPoints)
-    crossover = False
-    importNet = False
     
     
     numRuns = 1
@@ -31,7 +29,7 @@ def main():
         bestFitCurve = np.zeros(gens)
         # envs = gym.vector.make("Hopper-v4",num_envs = popSize)
         # envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
-        envs = gym.vector.make("HalfCheetah-v4",exclude_current_positions_from_observation=False,num_envs = popSize)
+        envs = gym.vector.make("Hopper-v4",exclude_current_positions_from_observation=True,num_envs = popSize)
         # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         # Initializing Population
@@ -62,7 +60,7 @@ def main():
                 for i in range(popSize):
                     action = pop[i][0].step(observations[i])
                     actions.append(action)
-                    fits[i]+=fitnet.step(observations[i])
+                    fits[i]+=fitnet.step(observations[i])[0]
 
                 observations, rewards, terminateds, truncateds, infos = envs.step(actions)
 
@@ -88,16 +86,11 @@ def main():
             for i in range(popSize-1):
 
                 a = np.random.randint(0,popSize//2)
-                b = np.random.randint(0,popSize//2)
 
-                if crossover:
-                    while a == b:
-                        b= np.random.randint(0,popSize//2)
-                    newNet = ANN.recombine(pop[a][0],pop[b][0])
-                else:
-                    newNet = ANN.copy(pop[a][0])
 
-                mutRate =1
+                newNet = ANN.copy(pop[a][0])
+
+                mutRate =0.1
                 # newNet.mutateSimple()
                 for m in range(numMutPoints):
                     newNet.mutateModular(mutRate)

@@ -6,10 +6,10 @@ import pickle
 
 # env = gym.make("MountainCarContinuous-v0",render_mode="human")
 # env = gym.make("Walker2d-v4",render_mode="human")
-env = gym.make("LunarLander-v2",continuous=True,render_mode="human")
+# env = gym.make("LunarLander-v2",continuous=True,render_mode="human")
 # env = gym.make("BipedalWalker-v3",render_mode="human")
 # env = gym.make("BipedalWalker-v3",hardcore=True,render_mode="human")
-# env = gym.make("Ant-v4",exclude_current_positions_from_observation=False,render_mode="human")
+env = gym.make("Hopper-v4",exclude_current_positions_from_observation=True,render_mode="human")
 inps = env.observation_space.shape[0]
 outs = env.action_space.shape[0]
 
@@ -26,6 +26,7 @@ print(fitnet.size,net.size)
 while True: 
     observation, info = env.reset()
     fitness = 0
+    observation, reward, terminated, truncated, info = env.step(np.zeros((env.action_space.shape)))
     # net.mutateSimple(0.1)
 
 
@@ -33,13 +34,14 @@ while True:
     for _ in range(500):
 
         inp = np.array(observation)
+        # inp = np.concatenate([[reward],observation])
         action = net.step(inp)
         # action = np.zeros(outs)
         observation, reward, terminated, truncated, info = env.step(action[-outs:])
         fitness+= fitnet.step(inp)
 
-        if terminated or truncated:
-            break
+        # if terminated or truncated:
+        #     break
 
 
     

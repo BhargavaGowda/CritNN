@@ -11,8 +11,8 @@ def main():
     #Search Parameters
     popSize = 10
     gens = 500
-    netSize = [8,32,32,2]
-    fitnetSize = [8,32,32,1]
+    netSize = [11,32,32,3]
+    fitnetSize = [11,32,32,1]
     numSteps = 500
 
     numMutPoints = int(pow(sum(netSize),0.6))
@@ -25,8 +25,8 @@ def main():
         print("Run:",run)
 
 
-        # envs = gym.vector.make("Ant-v4",exclude_current_positions_from_observation=False,num_envs = popSize)
-        envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
+        envs = gym.vector.make("Hopper-v4",exclude_current_positions_from_observation=True,num_envs = popSize)
+        # envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
         # envs = gym.make_vec("BipedalWalker-v3",hardcore=False,num_envs=popSize)
 
         # Initializing Population
@@ -51,20 +51,23 @@ def main():
             observations, infos = envs.reset()
             fits = np.zeros((popSize,popSize))
             dones = np.ones(popSize)
+            observations, rewards, terminateds, truncateds, infos = envs.step(np.zeros((popSize,envs.action_space.shape[1])))
             
             for _ in range(numSteps):
 
                 actions = []
                 for i in range(popSize):
-                    action = agentPop[i][0].step(observations[i])
+                    inp = observations[i]
+                    # inp = np.concatenate([[rewards[i]],observations[i]])
+                    action = agentPop[i][0].step(inp)
                     actions.append(action)
                     for j in range(popSize):
-                        fits[i,j]+=dones[i]*fitPop[j][0].step(observations[i])[0]
+                        fits[i,j]+=dones[i]*fitPop[j][0].step(inp)[0]
                 observations, rewards, terminateds, truncateds, infos = envs.step(actions)
 
                 for d in range(popSize):
-                    if terminateds[d] or truncateds[d] or observations[d][1]>1.5:
-                        dones[d]=0
+                    if terminateds[d] or truncateds[d]:
+                        dones[d]=1
 
 
             for p in range(popSize):
