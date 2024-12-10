@@ -10,8 +10,8 @@ def main():
 
     #Search Parameters
     popSize = 50
-    gens = 10000
-    netSize = [11,64,64,3]
+    gens = 500
+    netSize = [24,32,32,4]
     numSteps = 500
     crossPoints = int(pow(sum(netSize),0.6))
     mutPoints = int(pow(sum(netSize),0.6))
@@ -21,18 +21,18 @@ def main():
 
     diversityThreshold = 5
 
-    numRuns = 1
+    numRuns = 5
     data = np.zeros((numRuns,gens))
 
     for run in range(numRuns):
+        
         print("Run:",run)
-
 
         bestFitness = -10000
         bestFitCurve = np.zeros(gens)
-        envs = gym.vector.make("Hopper-v4",num_envs = popSize)
+        # envs = gym.vector.make("LunarLander-v2",num_envs = popSize)
         # envs = gym.make_vec("LunarLander-v2",continuous=True,num_envs=popSize)
-        # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
+        envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         # Initializing Population
         inps = envs.observation_space.shape[1]
@@ -47,6 +47,7 @@ def main():
 
         #Running gens
         for g in range(gens):
+
             mutRate*=.998
             print("progress:",str(100*g/float(gens))+"%")
 

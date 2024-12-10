@@ -10,9 +10,9 @@ def main():
     
 
 
-    netSize = [27,64,64,8]
-    numRuns = 1
-    gens = 10000
+    netSize = [24,32,32,4]
+    numRuns = 5
+    gens = 500
     data = np.zeros((numRuns,gens))
     testNet = ANN(netSize)
     paramlength = testNet.getParamVec().size
@@ -22,7 +22,7 @@ def main():
     for run in range(numRuns):
         es = OpenES(paramlength,                  # number of model parameters
                 sigma_init=1.,            # initial standard deviation
-                sigma_decay=0.995,         # don't anneal standard deviation
+                sigma_decay=0.9996,         # don't anneal standard deviation
                 learning_rate=0.1,         # learning rate for standard deviation
                 learning_rate_decay = 1.0, # annealing the learning rate
                 popsize=popSize,       # population size
@@ -36,9 +36,9 @@ def main():
 
         bestFitCurve = np.zeros(gens)
 
-        envs = gym.vector.make("Ant-v4",num_envs = popSize)
+        # envs = gym.vector.make("MountainCarContinuous-v0",num_envs = popSize)
         # envs = gym.vector.make("LunarLander-v2",continuous=True,num_envs=popSize)
-        # envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
+        envs = gym.make_vec("BipedalWalker-v3",num_envs=popSize)
 
         popVecs = es.ask()
         pop = []        
@@ -59,6 +59,8 @@ def main():
             fits = np.zeros(popSize)
             dones = np.ones(popSize)
 
+            stepsAvg = 0
+
             for _ in range(numSteps):
 
                 actions = []
@@ -71,8 +73,13 @@ def main():
 
                 for d in range(popSize):
                     if terminateds[d] or truncateds[d]:
+                        if dones[d]==1:
+                            stepsAvg+=_
                         dones[d]=0
-
+                        
+            #Dynamic step size
+            # numSteps = max(2 * int(stepsAvg/float(popSize)),100)
+            print("steps:", numSteps)
             es.tell(fits)
             bestFitCurve[g]= np.copy(es.result()[1])
             print(bestFitCurve[g])
